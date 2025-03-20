@@ -1,6 +1,12 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
+import { useState } from 'react'
+import { useEffect } from 'react'
 
 import Recommend from './Recommend'
+import Navbar from "./components/Navbar.jsx"
+import Home from "./pages/Home.jsx"
+import AirQuality from "./pages/AirQuality.jsx"
+import Importance from "./components/Importance.jsx"
 
 function App() {
   const [theme, setTheme] = useState('light')
@@ -10,7 +16,7 @@ function App() {
   }
 
   useEffect(() => {
-    document.documentElement.setAttribute('data-theme', theme)
+    document.documentElement.setAttribute('data-theme', theme) 
     if (theme === 'dark') {
       document.documentElement.classList.add('dark')
     } else {
