@@ -1,2 +1,2 @@
 ﻿# air_pollution_project
-cmon birju
+ birju
