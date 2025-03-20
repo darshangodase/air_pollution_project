@@ -1,11 +1,15 @@
 import { useState, useEffect } from 'react';
-import { Link, useLocation } from 'react-router-dom';
-import { FaSun, FaMoon, FaLeaf, FaWind } from 'react-icons/fa';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { FaSun, FaMoon, FaLeaf, FaSearch, FaSpinner } from 'react-icons/fa';
 
 const Navbar = ({ theme, toggleTheme }) => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [isSearching, setIsSearching] = useState(false);
+  const [searchError, setSearchError] = useState(null);
   const location = useLocation();
+  const navigate = useNavigate();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -19,6 +23,47 @@ const Navbar = ({ theme, toggleTheme }) => {
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
+
+  const handleSearch = async (e) => {
+    e.preventDefault();
+    
+    if (!searchQuery.trim()) return;
+    
+    setIsSearching(true);
+    setSearchError(null);
+    
+    try {
+      // Step 1: Get coordinates using OpenStreetMap Nominatim API
+      const geocodeResponse = await fetch(
+        `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(searchQuery)}&limit=1`
+      );
+      
+      if (!geocodeResponse.ok) {
+        throw new Error('Failed to get location coordinates');
+      }
+      
+      const places = await geocodeResponse.json();
+      
+      if (places.length === 0) {
+        throw new Error('Location not found. Please try a different place name.');
+      }
+      
+      const { lat, lon } = places[0];
+      
+      // Step 2: Navigate to air quality page with coordinates as query parameters
+      navigate(`/air-quality?lat=${lat}&lon=${lon}&place=${encodeURIComponent(searchQuery)}`);
+      
+      // Close mobile menu if open
+      setIsMobileMenuOpen(false);
+      setSearchQuery('');
+      
+    } catch (error) {
+      console.error('Search error:', error);
+      setSearchError(error.message);
+    } finally {
+      setIsSearching(false);
+    }
+  };
 
   return (
     <nav 
@@ -42,7 +87,42 @@ const Navbar = ({ theme, toggleTheme }) => {
           </Link>
 
           {/* Desktop Nav */}
-          <div className="hidden md:flex items-center space-x-8">
+          <div className="hidden md:flex items-center space-x-4">
+            {/* Search Form */}
+            <form onSubmit={handleSearch} className="relative">
+              <div className="flex items-center">
+                <input
+                  type="text"
+                  placeholder="Search location..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className={`py-1 px-3 pr-10 rounded-full text-sm focus:outline-none focus:ring-2 ${
+                    theme === 'dark' 
+                      ? 'bg-gray-700 text-white focus:ring-green-500 border-gray-600' 
+                      : 'bg-gray-100 text-gray-800 focus:ring-green-400 border-gray-200'
+                  } border transition-all`}
+                />
+                <button 
+                  type="submit" 
+                  className={`absolute right-2 p-1 rounded-full ${
+                    theme === 'dark' ? 'text-green-400 hover:text-green-300' : 'text-green-600 hover:text-green-500'
+                  }`}
+                  disabled={isSearching}
+                >
+                  {isSearching ? (
+                    <FaSpinner className="animate-spin" />
+                  ) : (
+                    <FaSearch />
+                  )}
+                </button>
+              </div>
+              {searchError && (
+                <div className="absolute left-0 right-0 mt-1 p-2 text-xs text-white bg-red-500 rounded">
+                  {searchError}
+                </div>
+              )}
+            </form>
+            
             <Link 
               to="/" 
               className={`transition-all duration-300 hover:text-green-500 ${
@@ -107,6 +187,41 @@ const Navbar = ({ theme, toggleTheme }) => {
       {/* Mobile Menu */}
       <div className={`md:hidden transition-all duration-300 ${isMobileMenuOpen ? 'h-auto opacity-100' : 'h-0 opacity-0 invisible'}`}>
         <div className={`px-4 py-3 space-y-3 ${theme === 'dark' ? 'bg-gray-800' : 'bg-white'}`}>
+          {/* Mobile Search Form */}
+          <form onSubmit={handleSearch} className="relative mb-4">
+            <div className="flex items-center">
+              <input
+                type="text"
+                placeholder="Search location..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className={`w-full py-2 px-4 pr-10 rounded-full text-sm focus:outline-none focus:ring-2 ${
+                  theme === 'dark' 
+                    ? 'bg-gray-700 text-white focus:ring-green-500 border-gray-600' 
+                    : 'bg-gray-100 text-gray-800 focus:ring-green-400 border-gray-200'
+                } border transition-all`}
+              />
+              <button 
+                type="submit" 
+                className={`absolute right-3 p-1 rounded-full ${
+                  theme === 'dark' ? 'text-green-400 hover:text-green-300' : 'text-green-600 hover:text-green-500'
+                }`}
+                disabled={isSearching}
+              >
+                {isSearching ? (
+                  <FaSpinner className="animate-spin" />
+                ) : (
+                  <FaSearch />
+                )}
+              </button>
+            </div>
+            {searchError && (
+              <div className="mt-1 p-2 text-xs text-white bg-red-500 rounded">
+                {searchError}
+              </div>
+            )}
+          </form>
+          
           <Link
             to="/"
             className={`block transition-all duration-300 hover:text-green-500 ${

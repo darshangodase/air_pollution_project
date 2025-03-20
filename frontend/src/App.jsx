@@ -1,6 +1,10 @@
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
-
 import Recommend from './Recommend'
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
+import { useState, useEffect } from 'react'
+import Navbar from './components/Navbar'
+import Home from './pages/Home'
+import AirQuality from './pages/AirQuality'
+import './App.css'
 
 function App() {
   const [theme, setTheme] = useState('light')
