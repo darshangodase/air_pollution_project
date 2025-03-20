@@ -1,16 +1,44 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { motion, AnimatePresence, useAnimation, useScroll, useTransform } from 'framer-motion';
-import { FaLeaf, FaCity, FaChartLine, FaInfoCircle, FaArrowRight, FaWind, FaCloudSun, FaBuilding } from 'react-icons/fa';
+import { FaLeaf, FaCity, FaChartLine, FaInfoCircle, FaArrowRight, FaWind, FaCloudSun, FaBuilding, FaExclamationTriangle } from 'react-icons/fa';
 
 const Home = ({ theme }) => {
   const controls = useAnimation();
   const { scrollY } = useScroll();
   
+  // States for API data
+  const [airData, setAirData] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  
   // Parallax effects
   const y1 = useTransform(scrollY, [0, 300], [0, -50]);
   const y2 = useTransform(scrollY, [0, 300], [0, -30]);
   const opacity = useTransform(scrollY, [0, 300], [1, 0.5]);
+
+  // Fetch air quality data
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const response = await fetch('https://api.airvisual.com/v2/nearest_city?key=7b81d64b-eed1-4b4c-9706-5358994490ba');
+        
+        if (!response.ok) {
+          throw new Error('Failed to fetch air quality data');
+        }
+        
+        const data = await response.json();
+        setAirData(data);
+        setLoading(false);
+      } catch (err) {
+        console.error('Error fetching air quality data:', err);
+        setError(err.message);
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, []);
 
   useEffect(() => {
     // Start animations when component mounts
@@ -19,6 +47,50 @@ const Home = ({ theme }) => {
     };
     sequence();
   }, [controls]);
+
+  // Helper functions for AQI
+  const getAqiLevel = (aqi) => {
+    if (aqi <= 50) return 'Good';
+    if (aqi <= 100) return 'Moderate';
+    if (aqi <= 150) return 'Unhealthy for Sensitive Groups';
+    if (aqi <= 200) return 'Unhealthy';
+    if (aqi <= 300) return 'Very Unhealthy';
+    return 'Hazardous';
+  };
+
+  const getAqiColor = (aqi) => {
+    if (aqi <= 50) return theme === 'dark' ? '#4ade80' : '#16a34a'; // Green
+    if (aqi <= 100) return theme === 'dark' ? '#facc15' : '#ca8a04'; // Yellow
+    if (aqi <= 150) return theme === 'dark' ? '#fb923c' : '#ea580c'; // Orange
+    if (aqi <= 200) return theme === 'dark' ? '#ef4444' : '#dc2626'; // Red
+    if (aqi <= 300) return theme === 'dark' ? '#a855f7' : '#9333ea'; // Purple
+    return theme === 'dark' ? '#b91c1c' : '#991b1b'; // Dark Red
+  };
+
+  const getWeatherIcon = (icon) => {
+    switch(icon) {
+      case '01d': return '☀️';
+      case '01n': return '🌙';
+      case '02d': case '02n': return '⛅';
+      case '03d': case '03n': return '☁️';
+      case '04d': case '04n': return '☁️';
+      case '09d': case '09n': return '🌧️';
+      case '10d': case '10n': return '🌦️';
+      case '11d': case '11n': return '⛈️';
+      case '13d': case '13n': return '❄️';
+      case '50d': case '50n': return '🌫️';
+      default: return '☁️';
+    }
+  };
+
+  // Calculate AQI values for visualization
+  const calculateStrokeDashoffset = (aqi) => {
+    // Total circumference is 282.7 (2 * PI * 45)
+    // Calculate the proportion filled based on AQI relative to 300 (max AQI)
+    const maxAqi = 300;
+    const proportion = Math.min(aqi / maxAqi, 1);
+    return 282.7 * (1 - proportion);
+  };
 
   const features = [
     {
@@ -198,123 +270,133 @@ const Home = ({ theme }) => {
               Real-time air quality monitoring for healthy cities and communities
             </motion.p>
             
-            {/* Circular AQI Meter */}
+            {/* Circular AQI Meter - Updated with real data */}
             <motion.div 
               className="relative w-64 h-64 md:w-80 md:h-80 mb-12"
               initial={{ scale: 0.8, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               transition={{ duration: 0.8, delay: 0.4 }}
             >
-              <svg viewBox="0 0 100 100" className="w-full h-full">
-                {/* Background circle */}
-                <circle 
-                  cx="50" cy="50" r="45" 
-                  stroke={theme === 'dark' ? '#1f2937' : '#f3f4f6'}
-                  strokeWidth="10" 
-                  fill="none" 
-                />
-                
-                {/* AQI indicator - animated arc */}
-                <motion.circle 
-                  cx="50" cy="50" r="45" 
-                  stroke={theme === 'dark' ? '#4ade80' : '#16a34a'} 
-                  strokeWidth="10" 
-                  fill="none" 
-                  strokeLinecap="round"
-                  strokeDasharray="282.7"
-                  initial={{ strokeDashoffset: 282.7 }}
-                  animate={{ strokeDashoffset: 142 }} // 50% filled for AQI of 50/100
-                  transition={{ 
-                    duration: 2, 
-                    ease: "easeInOut",
-                    delay: 0.8
-                  }}
-                />
-                
-                {/* Central text */}
-                <g className="text-center">
-                  <motion.text 
-                    x="50" y="45" 
-                    textAnchor="middle" 
-                    className={`text-3xl font-bold ${theme === 'dark' ? 'fill-white' : 'fill-gray-800'}`}
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    transition={{ delay: 1.2, duration: 0.6 }}
-                  >
-                    50
-                  </motion.text>
-                  <motion.text 
-                    x="50" y="60" 
-                    textAnchor="middle" 
-                    className={`text-lg ${theme === 'dark' ? 'fill-green-400' : 'fill-green-600'}`}
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    transition={{ delay: 1.4, duration: 0.6 }}
-                  >
-                    AQI
-                  </motion.text>
-                  <motion.text 
-                    x="50" y="75" 
-                    textAnchor="middle" 
-                    className={`text-sm ${theme === 'dark' ? 'fill-gray-300' : 'fill-gray-600'}`}
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    transition={{ delay: 1.6, duration: 0.6 }}
-                  >
-                    GOOD
-                  </motion.text>
-                </g>
-              </svg>
-              
-              {/* Animated indicators around the circle */}
-              {[0, 45, 90, 135, 180, 225, 270, 315].map((angle, i) => (
-                <motion.div 
-                  key={i}
-                  className={`absolute w-3 h-3 rounded-full ${
-                    i % 3 === 0 
-                      ? theme === 'dark' ? 'bg-green-400' : 'bg-green-500' 
-                      : i % 3 === 1 
-                        ? theme === 'dark' ? 'bg-blue-400' : 'bg-blue-500'
-                        : theme === 'dark' ? 'bg-yellow-300' : 'bg-yellow-400'
-                  }`}
-                  style={{
-                    left: `${50 + 45 * Math.cos(angle * Math.PI / 180)}%`,
-                    top: `${50 + 45 * Math.sin(angle * Math.PI / 180)}%`,
-                    transform: 'translate(-50%, -50%)'
-                  }}
-                  animate={{
-                    scale: [1, 1.5, 1],
-                    opacity: [0.7, 1, 0.7]
-                  }}
-                  transition={{
-                    duration: 2,
-                    repeat: Infinity,
-                    delay: i * 0.2
-                  }}
-                />
-              ))}
-              
-              {/* Air quality data points */}
-              <motion.div 
-                className="absolute inset-0 flex items-center justify-center"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ delay: 2, duration: 0.8 }}
-              >
-                <div className="absolute flex space-x-5 top-4 left-1/2 transform -translate-x-1/2">
-                  <div className={`text-xs p-1 px-2 rounded-full ${theme === 'dark' ? 'bg-blue-800 text-blue-200' : 'bg-blue-100 text-blue-800'}`}>
-                    <FaWind className="inline mr-1 text-xs" /> 5 m/s
-                  </div>
-                  <div className={`text-xs p-1 px-2 rounded-full ${theme === 'dark' ? 'bg-yellow-800 text-yellow-200' : 'bg-yellow-100 text-yellow-800'}`}>
-                    <span className="mr-1">☀️</span> 25°C
-                  </div>
+              {loading ? (
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <div className={`w-16 h-16 border-4 border-t-transparent rounded-full animate-spin mx-auto ${theme === 'dark' ? 'border-green-400' : 'border-green-600'}`}></div>
                 </div>
-              </motion.div>
+              ) : error ? (
+                <div className="absolute inset-0 flex flex-col items-center justify-center">
+                  <FaExclamationTriangle className="text-3xl text-red-500 mb-2" />
+                  <p className="text-center text-sm">Unable to load air quality data</p>
+                </div>
+              ) : airData && (
+                <>
+                  <svg viewBox="0 0 100 100" className="w-full h-full">
+                    {/* Background circle */}
+                    <circle 
+                      cx="50" cy="50" r="45" 
+                      stroke={theme === 'dark' ? '#1f2937' : '#f3f4f6'}
+                      strokeWidth="10" 
+                      fill="none" 
+                    />
+                    
+                    {/* AQI indicator - animated arc with real data */}
+                    <motion.circle 
+                      cx="50" cy="50" r="45" 
+                      stroke={getAqiColor(airData.data.current.pollution.aqius)} 
+                      strokeWidth="10" 
+                      fill="none" 
+                      strokeLinecap="round"
+                      strokeDasharray="282.7"
+                      initial={{ strokeDashoffset: 282.7 }}
+                      animate={{ strokeDashoffset: calculateStrokeDashoffset(airData.data.current.pollution.aqius) }}
+                      transition={{ 
+                        duration: 2, 
+                        ease: "easeInOut",
+                        delay: 0.8
+                      }}
+                    />
+                    
+                    {/* Central text with real data */}
+                    <g className="text-center">
+                      <motion.text 
+                        x="50" y="45" 
+                        textAnchor="middle" 
+                        className={`text-3xl font-bold ${theme === 'dark' ? 'fill-white' : 'fill-gray-800'}`}
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        transition={{ delay: 1.2, duration: 0.6 }}
+                      >
+                        {airData.data.current.pollution.aqius}
+                      </motion.text>
+                      <motion.text 
+                        x="50" y="60" 
+                        textAnchor="middle" 
+                        className={`text-lg ${theme === 'dark' ? 'fill-green-400' : 'fill-green-600'}`}
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        transition={{ delay: 1.4, duration: 0.6 }}
+                      >
+                        AQI
+                      </motion.text>
+                    </g>
+                  </svg>
+                  
+                  {/* Animated indicators around the circle */}
+                  {[0, 45, 90, 135, 180, 225, 270, 315].map((angle, i) => (
+                    <motion.div 
+                      key={i}
+                      className={`absolute w-3 h-3 rounded-full ${
+                        i % 3 === 0 
+                          ? theme === 'dark' ? 'bg-green-400' : 'bg-green-500' 
+                          : i % 3 === 1 
+                            ? theme === 'dark' ? 'bg-blue-400' : 'bg-blue-500'
+                            : theme === 'dark' ? 'bg-yellow-300' : 'bg-yellow-400'
+                      }`}
+                      style={{
+                        left: `${50 + 45 * Math.cos(angle * Math.PI / 180)}%`,
+                        top: `${50 + 45 * Math.sin(angle * Math.PI / 180)}%`,
+                        transform: 'translate(-50%, -50%)'
+                      }}
+                      animate={{
+                        scale: [1, 1.5, 1],
+                        opacity: [0.7, 1, 0.7]
+                      }}
+                      transition={{
+                        duration: 2,
+                        repeat: Infinity,
+                        delay: i * 0.2
+                      }}
+                    />
+                  ))}
+                  
+                  {/* Air quality data points with real data */}
+                  <motion.div 
+                    className="absolute inset-0 flex items-center justify-center"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ delay: 2, duration: 0.8 }}
+                  >
+                    <div className="absolute flex space-x-5 top-4 left-1/2 transform -translate-x-1/2">
+                      <div className={`text-xs p-1 px-2 rounded-full ${theme === 'dark' ? 'bg-blue-800 text-blue-200' : 'bg-blue-100 text-blue-800'}`}>
+                        <FaWind className="inline mr-1 text-xs" /> {airData.data.current.weather.ws} m/s
+                      </div>
+                      <div className={`text-xs p-1 px-2 rounded-full ${theme === 'dark' ? 'bg-yellow-800 text-yellow-200' : 'bg-yellow-100 text-yellow-800'}`}>
+                        <span className="mr-1">{getWeatherIcon(airData.data.current.weather.ic)}</span> {airData.data.current.weather.tp}°C
+                      </div>
+                    </div>
+                    
+                    {/* City name display */}
+                    <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2">
+                      <div className={`text-xs p-1 px-3 rounded-full ${theme === 'dark' ? 'bg-gray-800 text-gray-200' : 'bg-gray-100 text-gray-800'}`}>
+                        {airData.data.city}, {airData.data.country}
+                      </div>
+                    </div>
+                  </motion.div>
+                </>
+              )}
             </motion.div>
             
             {/* CTA Buttons */}
             <motion.div 
-              className="flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-6 items-center mt-2"
+              className="flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-6 items-center mt-2 mb-32 z-10"
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: 1.8 }}
@@ -545,31 +627,7 @@ const Home = ({ theme }) => {
               Start tracking air quality data in real-time and gain insights to help create a healthier urban environment.
             </motion.p>
             
-            <motion.div
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.6, duration: 0.5 }}
-              viewport={{ once: true }}
-            >
-              <Link 
-                to="/air-quality" 
-                className={`inline-flex items-center space-x-2 px-8 py-4 rounded-full text-lg ${
-                  theme === 'dark' 
-                    ? 'bg-blue-600 hover:bg-blue-700 text-white' 
-                    : 'bg-blue-500 hover:bg-blue-600 text-white'
-                } transition-all`}
-              >
-                <span>Check Your Air Quality Now</span>
-                <motion.div
-                  animate={{ x: [0, 5, 0] }}
-                  transition={{ duration: 1.5, repeat: Infinity }}
-                >
-                  <FaArrowRight />
-                </motion.div>
-              </Link>
-            </motion.div>
+           
           </div>
         </motion.div>
       </motion.section>

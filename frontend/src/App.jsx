@@ -1,12 +1,10 @@
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
-import { useState } from 'react'
-import { useEffect } from 'react'
-
 import Recommend from './Recommend'
-import Navbar from "./components/Navbar.jsx"
-import Home from "./pages/Home.jsx"
-import AirQuality from "./pages/AirQuality.jsx"
-import Importance from "./components/Importance.jsx"
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
+import { useState, useEffect } from 'react'
+import Navbar from './components/Navbar'
+import Home from './pages/Home'
+import AirQuality from './pages/AirQuality'
+import './App.css'
 
 function App() {
   const [theme, setTheme] = useState('light')
@@ -32,6 +30,7 @@ function App() {
           <Routes>
             <Route path="/" element={<Home theme={theme} />} />
             <Route path="/air-quality" element={<AirQuality theme={theme} />} />
+            <Route path="/recommend" element={<Recommend theme={theme} />} />
           </Routes>
         </div>
       </div>
