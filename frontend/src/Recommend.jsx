@@ -5,9 +5,9 @@ import { motion } from "framer-motion";
 import { FaArrowLeft, FaLeaf, FaExclamationTriangle, FaWind, FaTemperatureHigh } from "react-icons/fa";
 
 function Recommend({ theme }) {
-    const [responseData, setResponseData] = useState(null);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState(null);
+    const [responseData, setResponseData] = useState(null); 
+    const [loading, setLoading] = useState(true); 
+    const [error, setError] = useState(null); 
     const location = useLocation();
     const airData = location.state?.airData;
 
@@ -138,7 +138,7 @@ function Recommend({ theme }) {
                     console.log('Cleaned response for parsing:', response);
                     
                     // Parse the cleaned response
-                    const parsedResponse = JSON.parse(response);
+                    const parsedResponse = JSON.parse(response); 
                     
                     // Add default values for any missing properties
                     if (!parsedResponse.air_quality) {
@@ -170,7 +170,7 @@ function Recommend({ theme }) {
                         };
                     }
                     
-                    setResponseData(parsedResponse);
+                    setResponseData(parsedResponse); 
                     console.log('Successfully parsed response:', parsedResponse);
                 } catch (parseError) {
                     console.error('Error parsing JSON:', parseError);
@@ -211,7 +211,7 @@ function Recommend({ theme }) {
                 console.error('Error fetching data:', err);
                 setError('Failed to fetch recommendation data. Please try again later.');
             } finally {
-                setLoading(false);
+                setLoading(false); 
             }
         }
         
@@ -260,12 +260,12 @@ function Recommend({ theme }) {
                         <p>Based on air quality data from <span className="font-semibold">{airData.data.city}, {airData.data.country}</span></p>
                     </div>
 
-                    {loading ? (
+            {loading ? (
                         <div className="flex flex-col items-center justify-center py-12">
                             <div className={`w-16 h-16 border-4 border-t-transparent rounded-full animate-spin mb-4 ${theme === 'dark' ? 'border-green-400' : 'border-green-600'}`}></div>
                             <p className="text-lg">Generating personalized recommendations...</p>
                         </div>
-                    ) : error ? (
+            ) : error ? (
                         <div className={`p-6 rounded-xl ${theme === 'dark' ? 'bg-red-900/30' : 'bg-red-100'} mb-6`}>
                             <FaExclamationTriangle className={`text-3xl mb-2 ${theme === 'dark' ? 'text-red-400' : 'text-red-500'}`} />
                             <h2 className="text-xl font-bold mb-2">Error</h2>

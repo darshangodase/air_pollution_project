@@ -1,4 +1,5 @@
 import Recommend from './Recommend'
+import Forecast from './Forecast'
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
 import { useState, useEffect } from 'react'
 import Navbar from './components/Navbar'
@@ -31,6 +32,7 @@ function App() {
             <Route path="/" element={<Home theme={theme} />} />
             <Route path="/air-quality" element={<AirQuality theme={theme} />} />
             <Route path="/recommend" element={<Recommend theme={theme} />} />
+            <Route path="/forecast" element={<Forecast theme={theme} />} />
           </Routes>
         </div>
       </div>

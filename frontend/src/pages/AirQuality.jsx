@@ -133,6 +133,28 @@ const AirQuality = ({ theme }) => {
     navigate('/recommend', { state: { airData } });
   };
 
+  const navigateToForecast = () => {
+    // Get coordinates from URL parameters first
+    const urlLat = queryParams.get('lat');
+    const urlLon = queryParams.get('lon');
+    
+    // If we don't have coordinates from URL, use Mumbai as default
+    // This ensures we always have valid coordinates to work with
+    const lat = urlLat || "19.0760";
+    const lon = urlLon || "72.8777";
+    
+    // Pass both the airData and explicit coordinates
+    navigate(`/forecast?lat=${lat}&lon=${lon}`, { 
+      state: { 
+        airData,
+        coordinates: {
+          lat,
+          lon
+        }
+      } 
+    });
+  };
+
   useEffect(() => {
     // If lat and lon are in URL, use them, otherwise fetch for current location
     if (lat && lon) {
@@ -347,14 +369,25 @@ const AirQuality = ({ theme }) => {
                       }
                     </p>
                     
-                    <button
-                      onClick={navigateToRecommendations}
-                      className={`mt-4 px-6 py-2 rounded-lg font-medium transition-all transform hover:scale-105 ${
-                        theme === 'dark' ? 'bg-green-600 text-white hover:bg-green-700' : 'bg-green-500 text-white hover:bg-green-600'
-                      }`}
-                    >
-                      Get Detailed Health Recommendations
-                    </button>
+                    <div className="flex flex-col sm:flex-row space-y-3 sm:space-y-0 sm:space-x-4 mt-4">
+                      <button
+                        onClick={navigateToRecommendations}
+                        className={`px-6 py-2 rounded-lg font-medium transition-all transform hover:scale-105 ${
+                          theme === 'dark' ? 'bg-green-600 text-white hover:bg-green-700' : 'bg-green-500 text-white hover:bg-green-600'
+                        }`}
+                      >
+                        Get Detailed Recommendations
+                      </button>
+                      
+                      <button
+                        onClick={navigateToForecast}
+                        className={`px-6 py-2 rounded-lg font-medium transition-all transform hover:scale-105 ${
+                          theme === 'dark' ? 'bg-blue-600 text-white hover:bg-blue-700' : 'bg-blue-500 text-white hover:bg-blue-600'
+                        }`}
+                      >
+                        View Pollution Forecast
+                      </button>
+                    </div>
                   </div>
                 </div>
               </div>
