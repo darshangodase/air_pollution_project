@@ -5,6 +5,7 @@ import { useState, useEffect } from 'react'
 import Navbar from './components/Navbar'
 import Home from './pages/Home'
 import AirQuality from './pages/AirQuality'
+import AQIInformationDashboard from './components/Importance'
 import './App.css'
 
 function App() {
@@ -33,6 +34,7 @@ function App() {
             <Route path="/air-quality" element={<AirQuality theme={theme} />} />
             <Route path="/recommend" element={<Recommend theme={theme} />} />
             <Route path="/forecast" element={<Forecast theme={theme} />} />
+            <Route path="/importance" element={<AQIInformationDashboard theme={theme} />} />
           </Routes>
         </div>
       </div>

@@ -133,13 +133,19 @@ const AirQuality = ({ theme }) => {
     navigate('/recommend', { state: { airData } });
   };
 
-  const navigateToForecast = () => {
+  const navigateToForecast = async () => {
     // Get coordinates from URL parameters first
-    const urlLat = queryParams.get('lat');
-    const urlLon = queryParams.get('lon');
+    const url = new URL(window.location.href);
+    const urlLat = url.searchParams.get("lat");
+    const urlLon = url.searchParams.get("lon");
     
-    // If we don't have coordinates from URL, use Mumbai as default
-    // This ensures we always have valid coordinates to work with
+    console.log("Latitude:", urlLat, "Longitude:", urlLon);
+    
+    
+
+    console.log("urlLat, urlLon", urlLat, urlLon);
+
+
     const lat = urlLat || "19.0760";
     const lon = urlLon || "72.8777";
     
@@ -306,9 +312,7 @@ const AirQuality = ({ theme }) => {
                         <p className="text-sm">
                           <span className="font-semibold">Main Pollutant:</span> {airData.data.current.pollution.mainus}
                         </p>
-                        <p className="text-sm">
-                          <span className="font-semibold">AQI (China):</span> {airData.data.current.pollution.aqicn}
-                        </p>
+                       
                       </div>
                     </div>
 

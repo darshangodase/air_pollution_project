@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { FaSun, FaMoon, FaLeaf, FaSearch, FaSpinner } from 'react-icons/fa';
+import { FaSun, FaMoon, FaLeaf, FaSearch, FaSpinner, FaInfoCircle, FaChartLine, FaBook } from 'react-icons/fa';
+import { motion } from 'framer-motion';
 
 const Navbar = ({ theme, toggleTheme }) => {
   const [isScrolled, setIsScrolled] = useState(false);
@@ -141,6 +142,15 @@ const Navbar = ({ theme, toggleTheme }) => {
             >
               Air Quality
             </Link>
+            <Link 
+              to="/importance" 
+              className={`transition-all duration-300 hover:text-green-500 ${
+                location.pathname === '/importance' ? 
+                  (theme === 'dark' ? 'text-green-400' : 'text-green-600') : ''
+              }`}
+            >
+              AQI Information
+            </Link>
             <button 
               onClick={toggleTheme}
               className="rounded-full p-2 transition-all duration-300"
@@ -241,6 +251,16 @@ const Navbar = ({ theme, toggleTheme }) => {
             onClick={() => setIsMobileMenuOpen(false)}
           >
             Air Quality
+          </Link>
+          <Link
+            to="/importance"
+            className={`block transition-all duration-300 hover:text-green-500 ${
+              location.pathname === '/importance' ? 
+                (theme === 'dark' ? 'text-green-400' : 'text-green-600') : ''
+            }`}
+            onClick={() => setIsMobileMenuOpen(false)}
+          >
+            AQI Information
           </Link>
         </div>
       </div>

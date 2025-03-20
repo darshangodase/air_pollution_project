@@ -70,7 +70,8 @@ function Forecast({ theme }) {
         const response = await fetch(
           `https://api.openweathermap.org/data/2.5/air_pollution/forecast?lat=${lat}&lon=${lon}&appid=854565a612835d02b77ba54949cd7b35`
         );
-
+          
+        
         if (!response.ok) {
           throw new Error('Failed to fetch forecast data');
         }
