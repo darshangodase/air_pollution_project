@@ -1,10 +1,11 @@
 import { useState, useEffect } from 'react';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { FaMapMarkerAlt, FaTemperatureHigh, FaWind, FaTint, FaCompress, FaExclamationTriangle, FaSearch } from 'react-icons/fa';
 
 const AirQuality = ({ theme }) => {
   const location = useLocation();
+  const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [airData, setAirData] = useState(null);
@@ -126,6 +127,10 @@ const AirQuality = ({ theme }) => {
       setError(err.message);
       setLoading(false);
     }
+  };
+
+  const navigateToRecommendations = () => {
+    navigate('/recommend', { state: { airData } });
   };
 
   useEffect(() => {
@@ -341,6 +346,15 @@ const AirQuality = ({ theme }) => {
                                 : "Health warning of emergency conditions: everyone is more likely to be affected. Stay indoors and keep windows closed."
                       }
                     </p>
+                    
+                    <button
+                      onClick={navigateToRecommendations}
+                      className={`mt-4 px-6 py-2 rounded-lg font-medium transition-all transform hover:scale-105 ${
+                        theme === 'dark' ? 'bg-green-600 text-white hover:bg-green-700' : 'bg-green-500 text-white hover:bg-green-600'
+                      }`}
+                    >
+                      Get Detailed Health Recommendations
+                    </button>
                   </div>
                 </div>
               </div>

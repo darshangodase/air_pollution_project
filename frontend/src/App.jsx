@@ -30,6 +30,7 @@ function App() {
           <Routes>
             <Route path="/" element={<Home theme={theme} />} />
             <Route path="/air-quality" element={<AirQuality theme={theme} />} />
+            <Route path="/recommend" element={<Recommend theme={theme} />} />
           </Routes>
         </div>
       </div>
