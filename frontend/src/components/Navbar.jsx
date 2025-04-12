@@ -82,8 +82,9 @@ const Navbar = ({ theme, toggleTheme }) => {
               <FaLeaf className={`inline-block ${theme === 'dark' ? 'text-green-400' : 'text-green-500'} animate-pulse`} />
             </span>
             <span className="font-bold text-xl tracking-tight transition-all">
-              <span className={`${theme === 'dark' ? 'text-green-400' : 'text-green-600'}`}>AirHealth</span>
-              <span className={`${theme === 'dark' ? 'text-blue-400' : 'text-blue-600'}`}>Monitor</span>
+              <span className={`${theme === 'dark' ? 'text-red-400' : 'text-red-600'}`}>UrbanAir</span>
+              <span className={`${theme === 'dark' ? 'text-green-400' : 'text-green-600'}`}>Air</span>
+              <span className={`${theme === 'dark' ? 'text-blue-400' : 'text-blue-600'}`}>Guard</span>
             </span>
           </Link>
 
